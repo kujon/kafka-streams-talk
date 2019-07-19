@@ -128,4 +128,183 @@ for num in natural_numbers:
 
 ---
 
+## Streams topology
+
 ![Topology](https://docs.confluent.io/current/_images/streams-architecture-topology.jpg)
+
+---
+
+## Building one yourself
+
+```java
+KStream<Bytes, Long> naturalNumbers =
+        builder.stream(
+            "natural-numbers",
+            Consumed.with(Serdes.Bytes(), Serdes.Long()));
+
+KStream<Bytes, Long> moduloTwo =
+        naturalNumbers.mapValues((k, v) -> v % 2);
+
+moduloTwo.to("modulo-two", Produced.with(Serdes.Bytes(), Serdes.Long()));
+
+System.out.println("HE GET THIS!");
+```
+
+---
+
+## What's going on?
+
+#### 1. Building transformations merely describes what needs to be done
+
+#### 2. Instantiating\* the topology actually gets it done
+
+```java
+var topology = builder.build();
+
+var streams = new KafkaStreams(topology, properties); // This will block
+```
+
+---
+
+## State (aggregates)
+
+```java
+//  Continuously updated table
+KTable<Bytes, Long> evenCount =
+        moduloTwo
+            .filter((k, v) -> v.equals(0L))
+            .groupByKey(
+                Grouped.with(Serdes.Bytes(), Serdes.Long()))
+            .aggregate(
+                () -> 0L,
+                (k, v, agg) -> agg + 1,
+                Materialized.with(Serdes.Bytes(), Serdes.Long()));
+
+```
+
+---
+
+## Stream :point_left: :point_right: Table duality
+
+<Appear>
+
+#### 1. Table is a 'slice' through a stream
+
+#### 2. Stream is a changelog of a table
+
+</Appear>
+
+---
+
+![Duality](https://docs.confluent.io/current/_images/streams-table-duality-03.jpg)
+
+---
+
+## Consumed, Produced, Grouped, Materialized, what?
+
+<Appear>
+
+#### 1. Every piece of state is externalised (changelog topics)
+
+#### 2. To send/read it to/from the topic, it needs to be serialisable
+
+#### 3. Ser(ializer)De(serializer)
+
+</Appear>
+
+---
+
+## What is this Bytes serde?
+
+<Appear>
+
+#### 1. Every message consists of the value as well as the key.
+
+#### 2. Messages with the same key are processed sequentially on the same thread (like msgs on the same partition)
+
+#### 3. Cross-key operations are not possible\*
+
+#### 4. Keys being independent, can be processed by separate threads or separate machines.
+
+</Appear>
+
+---
+
+## Choosing the right key
+
+```java
+// Decide on what needs to be processed together
+// and what can be processed independently.
+// The following would be applicable for
+// e.g. calculating visits, since visits of different
+// vessels are independent
+
+KStream<ID, Position> positionsByVessel =
+        positions.selectKey((k, v) -> v.getVesselId());
+```
+
+---
+
+## Keys can be a derived piece of data.
+
+```java
+// The following would process all positions which geohashes match together.
+// Kind of similar to `ships_near_singapore` in the Python example ;)
+
+KStream<Integer, Position> positionsByArea =
+        positions.selectKey((k, v) -> GeoUtils.hash(v.getPosition()));
+```
+
+---
+
+## Solving the nested loop problem by making streams finite
+
+<Appear>
+
+### What?
+
+#### 1. If you cut out a bit of a stream, you've got yourself a window into it.
+
+#### 2. Tumbling, Hopping, Sliding, Session windows
+
+</Appear>
+
+---
+
+#### 1. Tumbling - fixed size (e.g. 5mins) - one closes, the next one opens
+
+<Appear>
+
+#### 2. Hopping - similar to tumbling, but they overlap (the next one can open before the previous one closes)
+
+#### 3. Sliding - fixed size that 'roll' continuously with time (special, only for joins)
+
+#### 4. Session - growing windows that close after a period of inactivity
+
+</Appear>
+
+---
+
+## Let's detect STS!
+
+```java
+KStream<Integer, Position> positionsByArea =
+        positions.selectKey((k, v) -> GeoUtils.hash(v.getPosition()));
+
+KStream<Integer, STS> stsStream =
+        positionsByArea.join(
+            positionsByArea,
+            (left, right) -> {
+
+                if (GeoUtils.closeEnough(
+                    left.getPosition(),
+                    right.getPosition())) {
+                    return new STS(left, right);
+                }
+
+                return null;
+            },
+            JoinWindows.of(Duration.ofMinutes(30L)),
+            Joined.with(Serdes.Integer(), Serdes.Position(), Serdes.Position()))
+        .filter((k, v) -> v != null);
+```
