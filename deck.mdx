@@ -1,6 +1,6 @@
 import { Appear } from "@mdx-deck/components";
 
-# Stream Processing
+# Streaming Primer
 
 ---
 
@@ -312,3 +312,51 @@ KStream<Integer, STS> stsStream =
             Joined.with(Serdes.Integer(), Serdes.Position(), Serdes.Position()))
         .filter((k, v) -> v != null);
 ```
+
+---
+
+## Let's briefly talk about time
+
+<Appear>
+
+![Sexy time](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVLLx_STXnzx3-duGdQQi372Lrj9XSP2GmHxexbYhFrkGgiL6v)
+
+</Appear>
+
+---
+
+## Event time vs. processing time
+
+<Appear>
+
+#### 1. Event time is the time event actually occured (e.g. vessel reported a draught value)
+
+#### 2. Processing time (otherwise known as wall-clock) is the time at which event is processed.
+
+</Appear>
+
+---
+
+## Classic batch processing
+
+The processing time is irrelevant, because we can ensure all records will get processed
+
+---
+
+## Watermark
+
+<Appear>
+
+#### 1. Deals with late data (processing time >> event time)
+
+#### 2. Decides how low are we willing to wait for the late data
+
+#### 3. I sadly failed to embed videos, so here's a [link](https://www.oreilly.com/ideas/the-world-beyond-batch-streaming-102).
+
+</Appear>
+
+---
+
+## Thank you!
+
+Slides: [https://github.com/kujon/kafka-streams-talk](https://github.com/kujon/kafka-streams-talk)
