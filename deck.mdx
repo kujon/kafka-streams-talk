@@ -21,7 +21,7 @@ import { Appear } from "@mdx-deck/components";
 natural_numbers = [0, 1, 2, 3, 4, 5, 6, ...]
 
 for num in natural_numbers:
-    send_downstream(num % 2 == 0)
+    send_downstream(num % 2)
 
 print("LALALALA, YOU WILL NEVER GET THIS!")
 
@@ -54,7 +54,7 @@ print("LALALALA, YOU WILL NEVER GET THIS!")
 natural_numbers = [0, 1, 2, 3, 4, 5, 6]
 
 for num in natural_numbers:
-    send_downstream(num % 2 == 0)
+    send_downstream(num % 2)
 
 print("he break the cage and he get this")
 
@@ -96,7 +96,7 @@ count_odd = 0
 count_even = 0
 
 for num in natural_numbers:
-    is_even = num % 2 === 0
+    is_even = num % 2 == 0
 
     if is_even:
         count_even = count_even + 1
