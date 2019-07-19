@@ -265,7 +265,11 @@ KStream<Integer, Position> positionsByArea =
 
 #### 1. If you cut out a bit of a stream, you've got yourself a window into it.
 
-#### 2. Tumbling, Hopping, Sliding, Session windows
+#### 2. Tumbling, Hopping, Session, Sliding windows
+
+#### 3. Can be used for aggregates (number of clicks per user's session)
+
+#### 4. Or joins (combine records with similar enough timestamps from 2 streams together)
 
 </Appear>
 
@@ -277,9 +281,9 @@ KStream<Integer, Position> positionsByArea =
 
 #### 2. Hopping - similar to tumbling, but they overlap (the next one can open before the previous one closes)
 
-#### 3. Sliding - fixed size that 'roll' continuously with time (special, only for joins)
+#### 3. Session - growing windows that close after a period of inactivity
 
-#### 4. Session - growing windows that close after a period of inactivity
+#### 4. Sliding - fixed size that 'roll' continuously with time (special, only for joins)
 
 </Appear>
 
