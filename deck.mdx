@@ -96,7 +96,7 @@ count_odd = 0
 count_even = 0
 
 for num in natural_numbers:
-    is_even = num % 2 == 0
+    is_even = num % 2 != 0
 
     if is_even:
         count_even = count_even + 1
@@ -283,7 +283,7 @@ KStream<Integer, Position> positionsByArea =
 
 #### 3. Session - growing windows that close after a period of inactivity
 
-#### 4. Sliding - fixed size that 'roll' continuously with time (special, only for joins)
+#### 4. Sliding - fixed size that 'roll' continuously with time (special, only for joins. Credit: Jessica Mander)
 
 </Appear>
 
