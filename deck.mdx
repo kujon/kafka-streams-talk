@@ -1,3 +1,131 @@
 import { Appear } from "@mdx-deck/components";
 
 # Stream Processing
+
+---
+
+## What is stream processing?
+
+<Appear>
+
+#### processing of infinite lists, one element at the time
+
+</Appear>
+
+---
+
+## Example
+
+```python
+
+natural_numbers = [0, 1, 2, 3, 4, 5, 6, ...]
+
+for num in natural_numbers:
+    send_downstream(num % 2 == 0)
+
+print("LALALALA, YOU WILL NEVER GET THIS!")
+
+```
+
+---
+
+![LALALALA](https://media1.tenor.com/images/88dda1e9aeca0ccf2307933f4217aaa4/tenor.gif?itemid=4117266)
+
+---
+
+## Differences to batch
+
+<Appear>
+
+#### 1. Batch can be thought of as a subset of streaming (lists are finite)
+
+#### 2. Streaming limits the number of algorithms you can use
+
+</Appear>
+
+---
+
+## Batch as subset of streaming
+
+#### Our loop will eventually terminate
+
+```python
+
+natural_numbers = [0, 1, 2, 3, 4, 5, 6]
+
+for num in natural_numbers:
+    send_downstream(num % 2 == 0)
+
+print("he break the cage and he get this")
+
+```
+
+---
+
+## Implications of never getting this
+
+<Appear>
+
+#### 1. Limited to one loop over the data per thread
+
+#### 2. No nested loops
+
+</Appear>
+
+---
+
+## No STSes detected
+
+```python
+for id1, position1 in ships_near_singapore:
+    for id2, position2 in ships_near_singapore:
+        if id1 != id2 and is_nearby(position1, position2)
+            send_downstream("stses", (id1, id2))
+
+# Processes a single message for an infinite amount of time
+
+```
+
+---
+
+## State
+
+```python
+
+count_odd = 0
+count_even = 0
+
+for num in natural_numbers:
+    is_even = num % 2 === 0
+
+    if is_even:
+        count_even = count_even + 1
+    else
+        count_odd = count_odd + 1
+```
+
+---
+
+## Persistence
+
+<Appear>
+
+#### 1. If the process exits, we loose our counters
+
+#### 2. Must keep state external to the process
+
+</Appear>
+
+---
+
+## There are solutions!
+
+<Appear>
+
+### Kafka Streams
+
+</Appear>
+
+---
+
+![Topology](https://docs.confluent.io/current/_images/streams-architecture-topology.jpg)
